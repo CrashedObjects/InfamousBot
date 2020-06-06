@@ -3,6 +3,8 @@ const { token } = require('./settings');
 const Keyv = require('keyv');
 const fs = require('fs');
 
+require ('./parseTime.js')();
+
 const client = new Client();
 
 const dbPath = './db.sqlite';
@@ -74,6 +76,15 @@ client.on('message', async message => {
         }
     
         return message.channel.send(`Prefix is \`${await prefixDB.get(message.guild.id) || globalPrefix}\``);
+	}
+
+	if (command === 'parsetime') {
+		var ptargs = "";
+		args.forEach(element => {
+			ptargs = ptargs + " " + element;
+		});
+		console.log(ptargs);
+		message.channel.send(parseTime(ptargs));
 	}
     
 });
