@@ -36,8 +36,10 @@ function respondAFK(userid, chanid, msg, deleteTimeDelay) {
         }
 
         var afkuser_afk_dbkey = afkuser + "_afk";
-        var afkuser_afk = get(afkuser_afk_dbkey);
+        //TODO: Fix promises in pending state here...
+        var afkuser_afk = get(afkuser_afk_dbkey).then(data => console.log(data));
         console.log(afkuser_afk);
+        
         if (afkuser_afk.length() && (afkuser != userid) && (get(afk_notify_expiry_time_dbkey) < time("X"))) {
             memberafk.push(afkuser);
             set(afk_notify_expiry_time_dbkey, time("X") + deleteTimeDelay);
@@ -50,16 +52,18 @@ function respondAFK(userid, chanid, msg, deleteTimeDelay) {
     //build the messages for replies or DMs as needed
     var now = time("X");
 
-    var description = "";
+    var description = "user afk list";
     memberafk.forEach(uid => {
         var afkX = "UserAFK";
         description = afkX;
     });
 
     var embed = new Discord.MessageEmbed()
-        .setColor('yellow')
+        .setColor('#ffc44f')
         .setTitle('AFK Alert for the following members:')
         .setDescription(description);
+    
+    return embed;
 }
 
 
