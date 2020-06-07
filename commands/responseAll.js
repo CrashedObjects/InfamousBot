@@ -28,19 +28,17 @@ function respondAFK(userid, chanid, msg, deleteTimeDelay) {
     // find out if there's actually someone mentioned who is AFK. Sort into members vs non-members
     var memberafk = [];
     var usermentionregex = /<@!?\d+>/g;
-    msg.match(usermentionregex).forEach(usermention => {
+    msg.match(usermentionregex).forEach(async usermention => {
         var afkuser = usermention;
         var afk_notify_expiry_time_dbkey = afkuser + "_" + chanid + "_afk_notify_expiry_time";
-        if (get(afk_notify_expiry_time_dbkey) === undefined) {
+        if (await get(afk_notify_expiry_time_dbkey) === undefined) {
             set(afk_notify_expiry_time_dbkey, 0);
         }
 
         var afkuser_afk_dbkey = afkuser + "_afk";
-        //TODO: Fix promises in pending state here...
-        var afkuser_afk = get(afkuser_afk_dbkey).then(data => console.log(data));
-        console.log(afkuser_afk);
+        var afkuser_afk = await get(afkuser_afk_dbkey);
         
-        if (afkuser_afk.length() && (afkuser != userid) && (get(afk_notify_expiry_time_dbkey) < time("X"))) {
+        if ((afkuser_afk != undefined) && (afkuser != userid) && (await get(afk_notify_expiry_time_dbkey) < time("X"))) {
             memberafk.push(afkuser);
             set(afk_notify_expiry_time_dbkey, time("X") + deleteTimeDelay);
         }
@@ -52,6 +50,7 @@ function respondAFK(userid, chanid, msg, deleteTimeDelay) {
     //build the messages for replies or DMs as needed
     var now = time("X");
 
+    // TODO: fix embed
     var description = "user afk list";
     memberafk.forEach(uid => {
         var afkX = "UserAFK";
