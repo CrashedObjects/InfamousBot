@@ -59,6 +59,7 @@ client.on('message', async message => {
 
 		// if we found a prefix, setup args; otherwise, this isn't a command
 		if (!prefix) {
+			console.log(message.content);
 			if (userMentionRegex.test(message.content)) {
 				var userMentionedRes = await userMentionedResponse(message.author.id, message.channel.id, message.content, 600);
 				//check to make sure message isn't empty. if empty, we ignore it.

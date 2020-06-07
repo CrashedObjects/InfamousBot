@@ -29,10 +29,12 @@ function respondAFK(userid, chanid, msg, deleteTimeDelay) {
     var memberafk = [];
     var usermentionregex = /<@!?\d+>/g;
     msg.match(usermentionregex).forEach(async usermention => {
-        var afkuser = usermention;
+        var afkuser = usermention.replace("<@!", "");
+        afkuser = afkuser.replace(">", "");
+        
         var afk_notify_expiry_time_dbkey = afkuser + "_" + chanid + "_afk_notify_expiry_time";
         if (await get(afk_notify_expiry_time_dbkey) === undefined) {
-            set(afk_notify_expiry_time_dbkey, 0);
+            await set(afk_notify_expiry_time_dbkey, 0);
         }
 
         var afkuser_afk_dbkey = afkuser + "_afk";
@@ -40,7 +42,7 @@ function respondAFK(userid, chanid, msg, deleteTimeDelay) {
         
         if ((afkuser_afk != undefined) && (afkuser != userid) && (await get(afk_notify_expiry_time_dbkey) < time("X"))) {
             memberafk.push(afkuser);
-            set(afk_notify_expiry_time_dbkey, time("X") + deleteTimeDelay);
+            await set(afk_notify_expiry_time_dbkey, time("X") + deleteTimeDelay);
         }
     });
 
