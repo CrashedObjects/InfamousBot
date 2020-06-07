@@ -4,6 +4,7 @@ const Keyv = require('keyv');
 const fs = require('fs');
 
 require ('./parseTime.js')();
+require ('./timeDiff.js')();
 
 const client = new Client();
 
@@ -83,10 +84,24 @@ client.on('message', async message => {
 		args.forEach(element => {
 			ptargs = ptargs + " " + element;
 		});
-		console.log(ptargs);
-		message.channel.send(parseTime(ptargs));
+
+		message.channel.send(parseTime(ptargs))
+			.then(msg => {
+				msg.delete({timeout: 10000})
+			});
 	}
-    
+	
+	if (command === 'timediff') {
+		var tdargs = "";
+		args.forEach(element => {
+			tdargs = tdargs + " " + element;
+		});
+
+		message.channel.send(timeDiff(tdargs))
+			.then(msg => {
+				msg.delete({timeout: 10000})
+			});
+	}
 });
 
 client.login(token);
