@@ -3,8 +3,10 @@ const { token } = require('./settings');
 const Keyv = require('keyv');
 const fs = require('fs');
 
-require ('./parseTime.js')();
-require ('./timeDiff.js')();
+require ('./commands/parseTime.js')();
+require ('./commands/timeDiff.js')();
+require ('./commands/responseAll.js')();
+require ('./commands/time.js')();
 
 const client = new Client();
 
@@ -33,6 +35,8 @@ const afkDB = new Keyv('sqlite://./db.sqlite', {
 });
 
 const globalPrefix = '.';
+const userMentionRegex = /<@!?\d+>/g;
+const roleMentionRegex = /<@&!?\d+>/g;
 
 client.on('ready', () => console.log('Ready!'));
 
@@ -54,7 +58,15 @@ client.on('message', async message => {
 		}
 
 		// if we found a prefix, setup args; otherwise, this isn't a command
-		if (!prefix) return;
+		if (!prefix) {
+			if (userMentionRegex.test(message.content)) {
+				return message.channel.send(userMentionedResponse(message.author.id, message.channel.id, message.content, 600));
+			}
+			if (roleMentionRegex.test(message.content)) {
+				return message.channel.send(roleMentionedResponse(message.content));
+			}
+			return;
+		}
 		args = message.content.slice(prefix.length).split(/\s+/);
 	} else {
 		// handle DMs
@@ -66,7 +78,7 @@ client.on('message', async message => {
 	const command = args.shift().toLowerCase();
 
     if (command === 'ping') {
-        message.channel.send('gnip');
+        message.channel.send('pong!');
     }
 
     if (command === 'prefix') {
@@ -85,7 +97,7 @@ client.on('message', async message => {
 			ptargs = ptargs + " " + element;
 		});
 
-		message.channel.send(parseTime(ptargs))
+		return message.channel.send(parseTime(ptargs))
 			.then(msg => {
 				msg.delete({timeout: 10000})
 			});
@@ -97,10 +109,14 @@ client.on('message', async message => {
 			tdargs = tdargs + " " + element;
 		});
 
-		message.channel.send(timeDiff(tdargs))
+		return message.channel.send(timeDiff(tdargs))
 			.then(msg => {
 				msg.delete({timeout: 10000})
 			});
+	}
+
+	if (command === 'time') {
+		return message.channel.send(time(args[0]));
 	}
 });
 
