@@ -85,7 +85,7 @@ function humanTimeDiff(time1, time2, mode) {
                         ret += "s";
                     }
                     if (m) {
-                        ret += " " + m + " second";
+                        ret += " " + m + " minute";
                         if (m != 1) {
                             ret += "s";
                         }
@@ -105,7 +105,7 @@ function humanTimeDiff(time1, time2, mode) {
                         }
                         return ret;
                     } else {
-                        ret = m_remain + "second";
+                        ret = m_remain + " second";
                         if (m_remain != 1) {
                             ret += "s";
                         }
@@ -226,7 +226,7 @@ function humanTimeDiff(time1, time2, mode) {
                 if (m_remain) ret += ", ";
             }
             if (m_remain) {
-                ret += h + " second";
+                ret += m_remain + " second";
                 if (m_remain != 1) ret += "s";
             }
             return ret;

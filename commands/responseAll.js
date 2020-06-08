@@ -1,14 +1,11 @@
 const Discord = require('discord.js');
 const Keyv = require('keyv');
 
-const afkDB = new Keyv('sqlite://./db.sqlite', {
-	table: 'afk',
-	busyTimeout: 10000
-});
+require('./timeDiff.js')();
 
 module.exports = function() {
-    this.userMentionedResponse = function (userid, chanid, msg, deleteTimeDelay) {
-        return respondAFK(userid, chanid, msg, deleteTimeDelay);
+    this.userMentionedResponse = function (afkDB, client, message, userid, chanid, msg, deleteTimeDelay) {
+        return respondAFK(afkDB, client, message, userid, chanid, msg, deleteTimeDelay);
     }
 
     this.roleMentionedResponse = function (msg) {
@@ -16,48 +13,71 @@ module.exports = function() {
     }
 }
 
-async function set(dbkey, value) {
-    await afkDB.set(dbkey, value);
-}
 
-async function get(dbkey) {
-    return await afkDB.get(dbkey);
-}
-
-function respondAFK(userid, chanid, msg, deleteTimeDelay) {
+async function respondAFK(afkDB, client, message, userid, chanid, msg, deleteTimeDelay) {
     // find out if there's actually someone mentioned who is AFK. Sort into members vs non-members
     var memberafk = [];
     var usermentionregex = /<@!?\d+>/g;
-    msg.match(usermentionregex).forEach(async usermention => {
-        var afkuser = usermention.replace("<@!", "");
+
+    var i = 0;
+    var usermention = msg.match(usermentionregex);
+    var afkuser;
+    for (i = 0; i < usermention.length; i++) {
+        afkuser = usermention[i].replace("<@!", "");
         afkuser = afkuser.replace(">", "");
-        
+
         var afk_notify_expiry_time_dbkey = afkuser + "_" + chanid + "_afk_notify_expiry_time";
-        if (await get(afk_notify_expiry_time_dbkey) === undefined) {
-            await set(afk_notify_expiry_time_dbkey, 0);
+
+        //await afkDB.set(afk_notify_expiry_time_dbkey, 0);
+        var afk_notify_expiry_time = await afkDB.get(afk_notify_expiry_time_dbkey);
+        
+        if (isNaN(afk_notify_expiry_time) || afk_notify_expiry_time === null) {
+            afk_notify_expiry_time = 0;
         }
 
         var afkuser_afk_dbkey = afkuser + "_afk";
-        var afkuser_afk = await get(afkuser_afk_dbkey);
+        var afkuser_afk = await afkDB.get(afkuser_afk_dbkey);
         
-        if ((afkuser_afk != undefined) && (afkuser != userid) && (await get(afk_notify_expiry_time_dbkey) < time("X"))) {
+        if ((afkuser_afk != undefined) && (afkuser != userid) && (parseInt(afk_notify_expiry_time) < parseInt(timeNow("X")))) {
             memberafk.push(afkuser);
-            await set(afk_notify_expiry_time_dbkey, time("X") + deleteTimeDelay);
+            await afkDB.set(afk_notify_expiry_time_dbkey, parseInt(timeNow("X")) + parseInt(deleteTimeDelay));
         }
-    });
-
+    }
+    
     // exit early if there are no AFK users mentioned
     if (memberafk.length === 0) { return; }
 
     //build the messages for replies or DMs as needed
     var now = time("X");
 
-    // TODO: fix embed
-    var description = "user afk list";
-    memberafk.forEach(uid => {
-        var afkX = "UserAFK";
-        description = afkX;
-    });
+    var description = "";
+    var i = 0;
+    var timeX = parseInt(timeNow("X"));
+    for (i = 0; i < memberafk.length; i++) {
+        var usernick = (await client.users.fetch(memberafk[i])).username;
+
+        var uid_afk_dbkey = memberafk[i] + "_afk";
+        var afkX = await afkDB.get(uid_afk_dbkey);
+        afkX = parseInt(afkX);
+        var ago = timeDiff("twodivs " + timeX + " " + afkX);
+        description += usernick + " is AFK and ";
+        if(timeX > afkX) {
+            description += "said they'd return **" + ago + " ago**.";
+        } else {
+            description += "will return **in " + ago + "**";
+        }
+        var afkmessage_dbkey = memberafk[i] + "_afk_msg";
+        var afkmessage = await afkDB.get(afkmessage_dbkey);
+        
+        if(afkmessage!= undefined) {
+            if(afkmessage.length > 0) {
+                description += " Reason: " + afkmessage.substring(0, 100);
+                if(afkmessage.length > 100) {
+                    description += "...";
+                }
+            }
+        }
+    }
 
     var embed = new Discord.MessageEmbed()
         .setColor('#ffc44f')
@@ -66,14 +86,3 @@ function respondAFK(userid, chanid, msg, deleteTimeDelay) {
     
     return embed;
 }
-
-
-
-/*
-{execcc;bgdelmsg;{get;deleteTimeDelay};{channelid};{send;{channelid};{embedbuild;
-  title:AFK Alert for the following members\:;
-  color:yellow;
-  description: {foreach;~uid;{get;~memberafk};{set;~afkX;{time;X;{get;_{get;~uid}_afk}}}{set;~ago;{trim;{execcc;timediff;twodivs;{get;~now};{get;~afkX}}}}{usernick;{get;~uid}} is AFK and {if;{math;-;{get;~now};{get;~afkX}};<;0;will return **in {get;~ago}**.;said they'd return **{get;~ago} ago**.}{if;{length;{get;_{get;~uid}_afk_msg}};{newline} {zws} {zws} Reason: {substring;{get;_{get;~uid}_afk_msg};0;100}{if;{length;{get;_{get;~uid}_afk_msg}};>;100;{set;~addfooter;1}...}}{newline}};
-  {if;{get;~addfooter};==;1;footer.text: Use !seen <username> to view user's full AFK reason}
-  ;
-}}}*/

@@ -7,6 +7,7 @@ require ('./commands/parseTime.js')();
 require ('./commands/timeDiff.js')();
 require ('./commands/responseAll.js')();
 require ('./commands/time.js')();
+require ('./commands/afk.js')();
 
 const client = new Client();
 
@@ -43,12 +44,12 @@ client.on('ready', () => console.log('Ready!'));
 
 client.on('message', async message => {
     if (message.author.bot) return;
-
+	
 	let args;
 	// handle messages in a guild
 	if (message.guild) {
 		let prefix;
-
+		
 		if (message.content.startsWith(globalPrefix)) {
 			prefix = globalPrefix;
 		} else {
@@ -59,19 +60,25 @@ client.on('message', async message => {
 
 		// if we found a prefix, setup args; otherwise, this isn't a command
 		if (!prefix) {
-			console.log(message.content);
+			//console.log(await client.user.fetch('<@!718657527067443240>'));
 			if (userMentionRegex.test(message.content)) {
-				var userMentionedRes = await userMentionedResponse(message.author.id, message.channel.id, message.content, 600);
+				var userMentionedRes = await userMentionedResponse(afkDB, client, message, message.author.id, message.channel.id, message.content, 600);
 				//check to make sure message isn't empty. if empty, we ignore it.
 				if (userMentionedRes != undefined) {
-					return message.channel.send(userMentionedRes);
+					return message.channel.send(userMentionedRes)
+					.then(msg => {
+						msg.delete({timeout: 600000})
+					});
 				}
-				// empty message. nothing to do
+				// empty message. nothing to send
 				return;
 			}
 			if (roleMentionRegex.test(message.content)) {
 				return message.channel.send(roleMentionedResponse(message.content));
 			}
+
+			//everything auto response
+			back(prefixDB, afkDB, client, message, message.author.id, message.channel.id, message.content, "autoresponse");
 			return;
 		}
 		args = message.content.slice(prefix.length).split(/\s+/);
@@ -123,7 +130,16 @@ client.on('message', async message => {
 	}
 
 	if (command === 'time') {
-		return message.channel.send(time(args[0]));
+		return message.channel.send(timeNow(args[0]));
+	}
+
+	if(command === 'afk') {
+		//return message.channel.send(await afk(prefixDB, afkDB, client, message, message.author.id, message.channel.id, args));
+		await afk(prefixDB, afkDB, client, message, message.author.id, message.channel.id, args);
+	}
+
+	if(command === 'back') {
+		await back(prefixDB, afkDB, client, message, message.author.id, message.channel.id, args);
 	}
 });
 
