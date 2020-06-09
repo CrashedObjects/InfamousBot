@@ -10,5 +10,7 @@ RUN npm install
 
 COPY . /usr/src/bot
 
+# Todo mount database to persistent storage
+
 # Start
 CMD ["node", "index.js"]
