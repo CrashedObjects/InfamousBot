@@ -8,6 +8,7 @@ require ('./commands/timeDiff.js')();
 require ('./commands/responseAll.js')();
 require ('./commands/time.js')();
 require ('./commands/afk.js')();
+require ('./commands/wsbot.js')();
 
 const client = new Client();
 
@@ -32,6 +33,11 @@ const prefixDB = new Keyv('sqlite://./db.sqlite', {
 
 const afkDB = new Keyv('sqlite://./db.sqlite', {
 	table: 'afk',
+	busyTimeout: 10000
+});
+
+const rosterDB = new Keyv('sqlite://./db.sqlite', {
+	table: 'wsroster',
 	busyTimeout: 10000
 });
 
@@ -74,7 +80,8 @@ client.on('message', async message => {
 				return;
 			}
 			if (roleMentionRegex.test(message.content)) {
-				return message.channel.send(roleMentionedResponse(message.content));
+				return;
+				//return message.channel.send(roleMentionedResponse(message.content));
 			}
 
 			//everything auto response
@@ -140,6 +147,11 @@ client.on('message', async message => {
 
 	if(command === 'back') {
 		await back(prefixDB, afkDB, client, message, message.author.id, message.channel.id, args);
+	}
+
+	if(command === 'wsbot') {
+		//await wsroster(rosterDB, client, message, message.author.id, message.channel.id, args);
+		return message.channel.send("New wsbot coming soon!");
 	}
 });
 
