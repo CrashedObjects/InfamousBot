@@ -24,7 +24,8 @@ async function afk (prefixDB, afkDB, client, message, userid, chanid, msg) {
         ret = "__**Command Name:**__ afk\n";
         ret += "__**Usage:**__ "+prefix+"afk <duration> [ reason ]\n\n";
         ret += "To indicate you have returned from AFK, type "+prefix+"back. For more information, type \`"+prefix+"afk help\`";
-        return ret;
+        message.channel.send(ret);
+        return;
     }
 
     if (msg[0].toLowerCase() === 'help') {
@@ -37,7 +38,8 @@ async function afk (prefixDB, afkDB, client, message, userid, chanid, msg) {
         ret += prefix + "afk 2h\n";
         ret += prefix + "afk 30 mins\n";
         ret += prefix + "afk 2h30m\n";
-        return ret;
+        message.channel.send(ret);
+        return;
     }
 
     var ptargs = "";
@@ -60,10 +62,15 @@ async function afk (prefixDB, afkDB, client, message, userid, chanid, msg) {
         duration = parsetime;
     }
 
-    if (duration === 0) return "Unable to parse your duration properly. Use `"+prefix+"afk help` for usage information.";
+    if (duration === 0) {
+        message.channel.send("Unable to parse your duration properly. Use `"+prefix+"afk help` for usage information.");
+        return;
+    }
 
-    if (duration > 172800) return "Unable to set AFK duration beyond 48h.";
-
+    if (duration > 172800) {
+        message.channel.send("Unable to set AFK duration beyond 48h.");
+        return;
+    }
 
     var futureunix = parseInt(timeN) + parseInt(duration);
     var time_in_words = timeDiff("fullshort " + parseInt(timeN) + " " + parseInt(futureunix));
@@ -111,7 +118,8 @@ async function afk (prefixDB, afkDB, client, message, userid, chanid, msg) {
         await afkDB.set(userid_afkmsg_dbkey, afkmessage);
     }
 
-    return ret;
+    message.channel.send(ret);
+    return;
 }
 
 function deleteLastAFKMsg(userid) {
@@ -137,7 +145,8 @@ async function back(prefixDB, afkDB, client, message, userid, chanid, msg, autor
             ret += "__**Usage:**__ "+prefix+"back\n";
             ret += "Manually returns user from AFK.\n"
             ret += "Note: Bot automatically returns user from AFK when user types something in the server after a certain period of time";
-            return ret;
+            message.channel.send(ret);
+            return;
         }
     }
 

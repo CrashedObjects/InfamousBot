@@ -9,6 +9,7 @@ require ('./commands/responseAll.js')();
 require ('./commands/time.js')();
 require ('./commands/afk.js')();
 require ('./commands/wsbot.js')();
+require ('./commands/help.js')();
 
 const client = new Client();
 
@@ -97,6 +98,10 @@ client.on('message', async message => {
 
 	// get the first space-delimited argument after the prefix as the command
 	const command = args.shift().toLowerCase();
+
+	if (command === 'help') {
+		help(message, message.author.id, message.channel.id);
+	}
 
     if (command === 'ping') {
         message.channel.send('pong!');
