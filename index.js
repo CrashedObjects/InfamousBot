@@ -10,6 +10,7 @@ require ('./commands/time.js')();
 require ('./commands/afk.js')();
 require ('./commands/wsbot.js')();
 require ('./commands/help.js')();
+require ('./commands/rates.js')();
 
 const client = new Client();
 
@@ -34,6 +35,11 @@ const prefixDB = new Keyv('sqlite://./db.sqlite', {
 
 const afkDB = new Keyv('sqlite://./db.sqlite', {
 	table: 'afk',
+	busyTimeout: 10000
+});
+
+const ratesDB = new Keyv('sqlite://./db.sqlite', {
+	table: 'rates',
 	busyTimeout: 10000
 });
 
@@ -157,6 +163,10 @@ client.on('message', async message => {
 	if(command === 'wsbot') {
 		//await wsroster(rosterDB, client, message, message.author.id, message.channel.id, args);
 		return message.channel.send("New wsbot coming soon!");
+	}
+
+	if(command === 'rates') {
+		await rates(prefixDB, ratesDB, client, message, message.author.id, message.channel.id, args);
 	}
 });
 
