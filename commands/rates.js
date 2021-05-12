@@ -23,6 +23,9 @@ function ratesHelp(prefix) {
 
 function parseRSlevel(rs) {
     var rslevel = '';
+    if (rs === undefined) {
+        return "error";
+    }
     if (rs.toLowerCase().startsWith("rs")) {
         rslevel = rs.toUpperCase();
     }
@@ -152,6 +155,10 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
                 var header = '';
                 for (i = 2; i < msg.length; i+=2) {
                     var rslevel = parseRSlevel(msg[i+1]);
+                    if(rslevel.toLowerCase() === "error") {
+                        message.channel.send("Error understanding RS " + msg[i+1]);
+                        return;
+                    }
                     if(userid_user_rates.indexOf(rslevel) === -1) {
                         message.channel.send("No " + rslevel + " rates found for " + msg[1]);
                         return;
