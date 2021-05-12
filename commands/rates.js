@@ -17,6 +17,8 @@ function ratesHelp(prefix) {
     ret += prefix+"rates set < username > < level > < orbs rate > < crystal rate > < tets rate > < mixed rate >\n";
     ret += prefix+"rates get < username >\n";
     ret += prefix+"rates calc < username > [ arts quantity ] [ level ] ...\n";
+    ret += prefix+"rates copy < from username > < to username >\n";
+    ret += prefix+"rates del < username >\n";
     ret += prefix+"rates list\n";
     return ret;
 }
@@ -46,6 +48,72 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
     if ((msg.length < 1) || (msg[0].toLowerCase() === 'help')) {
         message.channel.send(ratesHelp(prefix));
         return;
+    }
+
+    if (msg[0].toLowerCase() === 'copy') {
+        if (msg.length === 3) {
+            var userid_from_user_rates_dbkey = userid + "_" + msg[1] + "_rates";
+            var userid_to_user_rates_dbkey = userid + "_" + msg[2] + "_rates";
+
+            var userid_from_user_rates = await ratesDB.get(userid_from_user_rates_dbkey);
+
+            if (userid_from_user_rates === undefined) {
+                message.channel.send("Unable to copy rates. No rates found for user: " + msg[1]);
+                return;
+            }
+
+            var userid_list_dbkey = userid + "_list";
+            var userid_list = await ratesDB.get(userid_list_dbkey);
+            
+            if (userid_list != undefined) {
+                userid_list = JSON.parse(userid_list);
+            }
+
+            if (!Array.isArray(userid_list)) {
+                userid_list = [];
+            }
+
+            if(userid_list.indexOf(msg[2].toLowerCase()) === -1) {
+                userid_list.push(msg[2]);
+                userid_list = JSON.stringify(userid_list);
+                await ratesDB.set(userid_list_dbkey, userid_list);
+            }
+
+            await ratesDB.set(userid_to_user_rates_dbkey, userid_from_user_rates);
+            message.channel.send("Copied rates from " + msg[1] + " to " + msg[2]);
+            message.channel.send(await ratesDB.get(userid_to_user_rates_dbkey));
+        } else {
+            message.channel.send(ratesHelp(prefix));
+        }
+        return;
+    }
+
+    if (msg[0].toLowerCase() === 'delete' || msg[0].toLowerCase() === 'del') {
+        if (msg.length === 2) {
+            var userid_del_user_rates_dbkey = userid + "_" + msg[1] + "_rates";
+            message.channel.send("Deleting rates for user: " + msg[1]);
+            await ratesDB.delete(userid_del_user_rates_dbkey);
+
+            var userid_list_dbkey = userid + "_list";
+            var userid_list = await ratesDB.get(userid_list_dbkey);
+            
+            if (userid_list != undefined) {
+                userid_list = JSON.parse(userid_list);
+            }
+
+            if (!Array.isArray(userid_list)) {
+                userid_list = [];
+            }
+
+            if(userid_list.indexOf(msg[1].toLowerCase()) != -1) {
+                userid_list.splice(userid_list.indexOf(msg[1].toLowerCase()), 1);
+                userid_list = JSON.stringify(userid_list);
+                message.channel.send("Updating rates list");
+                await ratesDB.set(userid_list_dbkey, userid_list);
+            }
+        } else {
+            message.channel.send(ratesHelp(prefix));
+        }
     }
 
     if (msg[0].toLowerCase() === 'set') {
@@ -111,6 +179,7 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
         if (msg.length === 2) {
             var userid_user_rates_dbkey = userid + "_" + msg[1] + "_rates";
             var userid_user_rates = await ratesDB.get(userid_user_rates_dbkey);
+            var userid_user_rates_msg = userid_user_rates;
 
             if(userid_user_rates != undefined) {
                 userid_user_rates = JSON.parse(userid_user_rates);
@@ -122,7 +191,7 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
             }
             else {
                 message.channel.send("Rates for user " + msg[1] + ":\n");
-                message.channel.send(userid_user_rates);
+                message.channel.send(userid_user_rates_msg);
                 return;
             }
         }
