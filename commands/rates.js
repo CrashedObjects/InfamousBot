@@ -17,7 +17,7 @@ function ratesHelp(prefix) {
     ret += prefix+"rates set < username > < level > < orbs rate > < crystal rate > < tets rate > < mixed rate >\n";
     ret += prefix+"rates get < username >\n";
     ret += prefix+"rates calc < username > [ arts quantity ] [ level ] ...\n";
-    ret += prefix+"rates copy < from username > < to username >\n";
+    ret += prefix+"rates copy < from username > < to username > [ multiplier. Default = 1 ]\n";
     ret += prefix+"rates del < username >\n";
     ret += prefix+"rates list\n";
     return ret;
@@ -51,7 +51,7 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
     }
 
     if (msg[0].toLowerCase() === 'copy') {
-        if (msg.length === 3) {
+        if (msg.length >= 3) {
             var userid_from_user_rates_dbkey = userid + "_" + msg[1] + "_rates";
             var userid_to_user_rates_dbkey = userid + "_" + msg[2] + "_rates";
 
@@ -60,6 +60,18 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
             if (userid_from_user_rates === undefined) {
                 message.channel.send("Unable to copy rates. No rates found for user: " + msg[1]);
                 return;
+            }
+
+            var userid_to_user_rates = JSON.parse(userid_from_user_rates);
+            var i;
+            var multiplier = 1;
+            if (!isNaN(msg[3])) {
+                multiplier = parseFloat(msg[3]);
+            }
+            for (i = 0; i < userid_to_user_rates.length; i++) {
+                if (!isNaN(userid_to_user_rates[i])) {
+                    userid_to_user_rates[i] = userid_to_user_rates[i] * multiplier;
+                }
             }
 
             var userid_list_dbkey = userid + "_list";
@@ -79,7 +91,7 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
                 await ratesDB.set(userid_list_dbkey, userid_list);
             }
 
-            await ratesDB.set(userid_to_user_rates_dbkey, userid_from_user_rates);
+            await ratesDB.set(userid_to_user_rates_dbkey, JSON.stringify(userid_to_user_rates));
             message.channel.send("Copied rates from " + msg[1] + " to " + msg[2]);
             message.channel.send(await ratesDB.get(userid_to_user_rates_dbkey));
         } else {
