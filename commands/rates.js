@@ -263,22 +263,33 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
                 }
                 header += " =\n\n";
 
-                orbs = Math.round(orbs*10)/10;
-                crys = Math.round(crys*10)/10;
-                tets = Math.round(tets*10)/10;
-                mixed = Math.round(mixed*10)/10;
+                orbs = Math.round(orbs);
+                crys = Math.round(crys);
+                tets = Math.round(tets);
+                mixed = Math.round(mixed);
                 
 
+                var orbscrysFloor = Math.floor(orbs/2.0);
+                var mixedFloor = Math.floor(mixed/3.0);
                 var ret = '';
                 if (orbs === crys) {
-                    ret += '**Orbs/Crys: ** ' + orbs + " (" + Math.round(orbs/2.0*10)/10 + " each)\nOR\n";
+                    ret += '**Orbs/Crys: ** ' + orbs + " (" + orbscrysFloor + " each";
+                    if ( orbs-(orbscrysFloor*2) > 0 ) {
+                        ret += " + " + (orbs - (orbscrysFloor*2));
+                    }
+                    ret += ")\nOR\n";
                 }
                 else {
                     ret += '**Orbs: ** ' + orbs + "\nOR\n";
                     ret += '**Crys: ** ' + crys + "\nOR\n";
                 }
                 ret += '**Tets: ** ' + tets + "\nOR\n";
-                ret += '**Mixed: ** ' + mixed + " (" + Math.round(mixed/3.0*10)/10 + " each)";
+                ret += '**Mixed: ** ' + mixed + " (" + mixedFloor + " each";
+
+                if ( mixed - (mixedFloor*3) > 0 ) {
+                    ret += " + " + (mixed - (mixedFloor*3));
+                }
+                ret += ")";
 
                 message.channel.send(header + ret);
 
