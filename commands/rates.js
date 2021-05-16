@@ -202,7 +202,25 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
                 return;
             }
             else {
-                message.channel.send("Rates for user " + msg[1] + ":\n");
+                var ret = "Rates for " + msg[1] + ":\n";
+                ret += "```RS#.....Orbs| Crys| Tets|Mixed\n";
+                var i;
+                var retArr = [];
+                var retArrPush = "";
+                for (i = 0; i < userid_user_rates.length; i+=5) {
+                    retArrPush = userid_user_rates[i].padEnd(7, ".");
+                    retArrPush += (Math.round((userid_user_rates[i+1] + Number.EPSILON) * 100) / 100).toFixed(2).padStart(5, ".") + "|";
+                    retArrPush += (Math.round((userid_user_rates[i+2] + Number.EPSILON) * 100) / 100).toFixed(2).padStart(5, ".") + "|";
+                    retArrPush += (Math.round((userid_user_rates[i+3] + Number.EPSILON) * 100) / 100).toFixed(2).padStart(5, ".") + "|";
+                    retArrPush += (Math.round((userid_user_rates[i+4] + Number.EPSILON) * 100) / 100).toFixed(2).padStart(5, ".") + "\n";
+                    retArr.push(retArrPush);
+                }
+                retArr.sort();
+                for (i = 0; i < retArr.length; i++) {
+                    ret += retArr[retArr.length-i-1];
+                }
+                ret += "```";
+                message.channel.send(ret);
                 message.channel.send(userid_user_rates_msg);
                 return;
             }
