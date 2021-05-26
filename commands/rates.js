@@ -70,7 +70,7 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
             }
             for (i = 0; i < userid_to_user_rates.length; i++) {
                 if (!isNaN(userid_to_user_rates[i])) {
-                    userid_to_user_rates[i] = userid_to_user_rates[i] * multiplier;
+                    userid_to_user_rates[i] = Math.round(((userid_to_user_rates[i] * multiplier) + Number.EPSILON) * 100) / 100;
                 }
             }
 
