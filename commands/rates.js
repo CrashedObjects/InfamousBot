@@ -208,7 +208,7 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
                 var retArr = [];
                 var retArrPush = "";
                 for (i = 0; i < userid_user_rates.length; i+=5) {
-                    retArrPush = userid_user_rates[i].padEnd(7, ".");
+                    retArrPush = userid_user_rates[i].padEnd(7, ".").replace("RS10", "RS90");
                     retArrPush += (Math.round((userid_user_rates[i+1] + Number.EPSILON) * 100) / 100).toFixed(2).padStart(5, ".") + "|";
                     retArrPush += (Math.round((userid_user_rates[i+2] + Number.EPSILON) * 100) / 100).toFixed(2).padStart(5, ".") + "|";
                     retArrPush += (Math.round((userid_user_rates[i+3] + Number.EPSILON) * 100) / 100).toFixed(2).padStart(5, ".") + "|";
@@ -217,7 +217,7 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
                 }
                 retArr.sort();
                 for (i = 0; i < retArr.length; i++) {
-                    ret += retArr[retArr.length-i-1];
+                    ret += retArr[retArr.length-i-1].replace("RS90", "RS10");
                 }
                 ret += "```";
                 message.channel.send(ret);
