@@ -253,30 +253,32 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
 
                 var header = '';
                 for (i = 2; i < msg.length; i+=2) {
-                    var rslevel = parseRSlevel(msg[i+1]);
-                    if(rslevel.toLowerCase() === "error") {
-                        message.channel.send("Error understanding RS " + msg[i+1]);
-                        return;
-                    }
-                    if(userid_user_rates.indexOf(rslevel) === -1) {
-                        message.channel.send("No " + rslevel + " rates found for " + msg[1]);
-                        return;
-                    }
-                    else {
-                        var orbsrate = parseFloat(userid_user_rates[userid_user_rates.indexOf(rslevel)+1]);
-                        var crysrate = parseFloat(userid_user_rates[userid_user_rates.indexOf(rslevel)+2]);
-                        var tetsrate = parseFloat(userid_user_rates[userid_user_rates.indexOf(rslevel)+3]);
-                        var mixedrate = parseFloat(userid_user_rates[userid_user_rates.indexOf(rslevel)+4]);
-
-                        orbs += parseFloat(msg[i]) / orbsrate;
-                        crys += parseFloat(msg[i]) / crysrate;
-                        tets += parseFloat(msg[i]) / tetsrate;
-                        mixed += parseFloat(msg[i]) /mixedrate;
-
-                        if (header != '') {
-                            header += " + ";
+                    if ((i+1) < msg.length) {
+                        var rslevel = parseRSlevel(msg[i+1]);
+                        if(rslevel.toLowerCase() === "error") {
+                            message.channel.send("Error understanding RS " + msg[i+1]);
+                            return;
                         }
-                        header += msg[i]+"x"+rslevel;
+                        if(userid_user_rates.indexOf(rslevel) === -1) {
+                            message.channel.send("No " + rslevel + " rates found for " + msg[1]);
+                            return;
+                        }
+                        else {
+                            var orbsrate = parseFloat(userid_user_rates[userid_user_rates.indexOf(rslevel)+1]);
+                            var crysrate = parseFloat(userid_user_rates[userid_user_rates.indexOf(rslevel)+2]);
+                            var tetsrate = parseFloat(userid_user_rates[userid_user_rates.indexOf(rslevel)+3]);
+                            var mixedrate = parseFloat(userid_user_rates[userid_user_rates.indexOf(rslevel)+4]);
+
+                            orbs += parseFloat(msg[i]) / orbsrate;
+                            crys += parseFloat(msg[i]) / crysrate;
+                            tets += parseFloat(msg[i]) / tetsrate;
+                            mixed += parseFloat(msg[i]) /mixedrate;
+
+                            if (header != '') {
+                                header += " + ";
+                            }
+                            header += msg[i]+"x"+rslevel;
+                        }
                     }
                 }
                 header += " =\n\n";
@@ -290,25 +292,83 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
                 var orbscrysFloor = Math.floor(orbs/2.0);
                 var mixedFloor = Math.floor(mixed/3.0);
                 var ret = '';
-                if (orbs === crys) {
-                    ret += '**Orbs/Crys: ** ' + orbs + " (" + orbscrysFloor + " each";
-                    if ( orbs-(orbscrysFloor*2) > 0 ) {
-                        ret += " + " + (orbs - (orbscrysFloor*2));
-                    }
-                    ret += ")\nOR\n";
+                var retOrbsCrys = '';
+                var retOrbs = '';
+                var retCrys = '';
+                var retTets = '';
+                var retMixed = '';
+                var retNewLine = '\nOR\n';
+
+                retOrbsCrys += '**Orbs/Crys: ** ' + orbs + " (" + orbscrysFloor + " each";
+                if ( orbs-(orbscrysFloor*2) > 0 ) {
+                    retOrbsCrys += " + " + (orbs - (orbscrysFloor*2));
                 }
-                else {
-                    ret += '**Orbs: ** ' + orbs + "\nOR\n";
-                    ret += '**Crys: ** ' + crys + "\nOR\n";
-                }
-                ret += '**Tets: ** ' + tets + "\nOR\n";
-                ret += '**Mixed: ** ' + mixed + " (" + mixedFloor + " each";
+                retOrbsCrys += ")";
+
+                retOrbs += '**Orbs: ** ' + orbs;
+                retCrys += '**Crys: ** ' + crys;
+
+                retTets += '**Tets: ** ' + tets;
+                retMixed += '**Mixed: ** ' + mixed + " (" + mixedFloor + " each";
 
                 if ( mixed - (mixedFloor*3) > 0 ) {
-                    ret += " + " + (mixed - (mixedFloor*3));
+                    retMixed += " + " + (mixed - (mixedFloor*3));
                 }
-                ret += ")";
-
+                retMixed += ")";
+                
+                switch(msg[msg.length-1].toLowerCase()) {
+                    case 'oc':
+                        if(ret === '') {
+                            ret = retOrbsCrys;
+                        } else {
+                            ret += retNewLine;
+                            ret = retOrbsCrys;
+                        }
+                        break;
+                    case 'o':
+                        if(ret === '') {
+                            ret = retOrbs;
+                        } else {
+                            ret += retNewLine;
+                            ret = retOrbs;
+                        }
+                        break;
+                    case 'c':
+                        if(ret === '') {
+                            ret = retCrys;
+                        } else {
+                            ret += retNewLine;
+                            ret = retCrys;
+                        }
+                        break;
+                    case 't':
+                        if(ret === '') {
+                            ret = retTets;
+                        } else {
+                            ret += retNewLine;
+                            ret = retTets;
+                        }
+                        break;
+                    case 'm':
+                        if(ret === '') {
+                            ret = retMixed;
+                        } else {
+                            ret += retNewLine;
+                            ret = retMixed;
+                        }
+                        break;
+                    default:
+                        if (orbs === crys) {
+                            ret = retOrbsCrys;
+                        } else {
+                            ret = retOrbs;
+                            ret += retCrys;
+                        }
+                        ret += retNewLine;
+                        ret += retTets + retNewLine;
+                        ret += retMixed;
+                }
+                
                 message.channel.send(header + ret);
 
                 return;
