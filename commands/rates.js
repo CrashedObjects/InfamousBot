@@ -19,6 +19,7 @@ function ratesHelp(prefix) {
     ret += prefix+"rates calc < username > [ arts quantity ] [ level ] ...\n";
     ret += prefix+"rates copy < from username > < to username > [ multiplier. Default = 1 ]\n";
     ret += prefix+"rates del < username >\n";
+    ret += prefix+"rates default < username > < m (mixed) | o (orbs) | c (crys) | oc (orbs/crys) | t (tets) >\n";
     ret += prefix+"rates list\n";
     return ret;
 }
@@ -231,10 +232,31 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
         }
     }
 
+    if (msg[0].toLowerCase() === 'default' || msg[0].toLowerCase() === 'def') {
+        if (msg.length === 3) {
+            var userid_user_rates_default_output_dbkey = userid + "_" + msg[1] + "_rates_default_output";
+
+            if (msg[2].toLowerCase() === 'del' || msg[2].toLowerCase() === 'delete') {
+                await ratesDB.delete(userid_user_rates_default_output_dbkey);
+                message.channel.send("Deleted default output for user '" + msg[1] + "'");
+            } else {
+                await ratesDB.set(userid_user_rates_default_output_dbkey, msg[2].toLowerCase());
+                message.channel.send("Set default output for user '" + msg[1] + "' to " + msg[2].toLowerCase());
+            }
+        }
+        return;
+    }
+
     if (msg[0].toLowerCase() === 'calc') {
         if (msg.length >= 4) {
             var userid_user_rates_dbkey = userid + "_" + msg[1] + "_rates";
             var userid_user_rates = await ratesDB.get(userid_user_rates_dbkey);
+            var userid_user_rates_default_output_dbkey = userid + "_" + msg[1] + "_rates_default_output";
+            var userid_user_rates_default_output = await ratesDB.get(userid_user_rates_default_output_dbkey);
+
+            if ((userid_user_rates_default_output != undefined) && (msg.length % 2 === 0)) {
+                msg.push(userid_user_rates_default_output);
+            }
 
             if (userid_user_rates != undefined) {
                 userid_user_rates = JSON.parse(userid_user_rates);
