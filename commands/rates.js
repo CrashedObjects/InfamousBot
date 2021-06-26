@@ -124,6 +124,13 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
                 message.channel.send("Updating rates list");
                 await ratesDB.set(userid_list_dbkey, userid_list);
             }
+
+            var userid_user_rates_default_output_dbkey = userid + "_" + msg[1] + "_rates_default_output";
+            var userid_user_rates_default_output = await ratesDB.get(userid_user_rates_default_output_dbkey);
+
+            if (userid_user_rates_default_output != undefined) {
+                await ratesDB.delete(userid_user_rates_default_output_dbkey);
+            }
         } else {
             message.channel.send(ratesHelp(prefix));
         }
@@ -247,12 +254,21 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
         if (msg.length === 3) {
             var userid_user_rates_default_output_dbkey = userid + "_" + msg[1] + "_rates_default_output";
 
-            if (msg[2].toLowerCase() === 'del' || msg[2].toLowerCase() === 'delete') {
-                await ratesDB.delete(userid_user_rates_default_output_dbkey);
-                message.channel.send("Deleted default output for user '" + msg[1] + "'");
+            var userid_user_rates_dbkey = userid + "_" + msg[1] + "_rates";
+            var userid_user_rates = await ratesDB.get(userid_user_rates_dbkey);
+            var userid_user_rates_msg = userid_user_rates;
+
+            if(userid_user_rates != undefined) {
+                if (msg[2].toLowerCase() === 'del' || msg[2].toLowerCase() === 'delete') {
+                    await ratesDB.delete(userid_user_rates_default_output_dbkey);
+                    message.channel.send("Deleted default output for user '" + msg[1] + "'");
+                } else {
+                    await ratesDB.set(userid_user_rates_default_output_dbkey, msg[2].toLowerCase());
+                    message.channel.send("Set default output for user '" + msg[1] + "' to " + msg[2].toLowerCase());
+                }
             } else {
-                await ratesDB.set(userid_user_rates_default_output_dbkey, msg[2].toLowerCase());
-                message.channel.send("Set default output for user '" + msg[1] + "' to " + msg[2].toLowerCase());
+                message.channel.send("No such user '" + msg[1] + "'");
+                await ratesDB.delete(userid_user_rates_default_output_dbkey);
             }
         }
         return;
