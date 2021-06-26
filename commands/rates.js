@@ -19,7 +19,7 @@ function ratesHelp(prefix) {
     ret += prefix+"rates calc < username > [ arts quantity ] [ level ] ...\n";
     ret += prefix+"rates copy < from username > < to username > [ multiplier. Default = 1 ]\n";
     ret += prefix+"rates del < username >\n";
-    ret += prefix+"rates default < username > < m (mixed) | o (orbs) | c (crys) | oc (orbs/crys) | t (tets) >\n";
+    ret += prefix+"rates default < username > [ m (mixed) | o (orbs) | c (crys) | oc (orbs/crys) | t (tets) | delete ]\n";
     ret += prefix+"rates list\n";
     return ret;
 }
@@ -233,6 +233,17 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
     }
 
     if (msg[0].toLowerCase() === 'default' || msg[0].toLowerCase() === 'def') {
+        if (msg.length === 2) {
+            var userid_user_rates_default_output_dbkey = userid + "_" + msg[1] + "_rates_default_output";
+            var userid_user_rates_default_output = await ratesDB.get(userid_user_rates_default_output_dbkey);
+
+            if (userid_user_rates_default_output != undefined) {
+                message.channel.send("Default output for user '" + msg[1] + "' is " + userid_user_rates_default_output);
+            } else {
+                message.channel.send("No default output for user '" + msg[1] + "'");
+            }
+            return;
+        }
         if (msg.length === 3) {
             var userid_user_rates_default_output_dbkey = userid + "_" + msg[1] + "_rates_default_output";
 
