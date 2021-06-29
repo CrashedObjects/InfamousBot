@@ -346,6 +346,8 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
                 var retCrys = '';
                 var retTets = '';
                 var retMixed = '';
+                var retOrbsTets = '';
+                var retCrysTets = '';
                 var retNewLine = '\nOR\n';
 
                 retOrbsCrys += '**Orbs/Crys: ** ' + orbs + " (" + orbscrysFloor + " each";
@@ -357,6 +359,12 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
                 retOrbs += '**Orbs: ** ' + orbs;
                 retCrys += '**Crys: ** ' + crys;
 
+                retOrbsTets += '**Orbs: ** ' + Math.floor(orbs/2.0) + '\nAND\n';
+                retOrbsTets += '**Tets: ** ' + Math.floor(tets/2.0);
+
+                retCrysTets += '**Crys: ** ' + Math.floor(crys/2.0) + '\nAND\n';
+                retCrysTets += '**Tets: ** ' + Math.floor(tets/2.0);
+
                 retTets += '**Tets: ** ' + tets;
                 retMixed += '**Mixed: ** ' + mixed + " (" + mixedFloor + " each";
 
@@ -366,12 +374,31 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
                 retMixed += ")";
                 
                 switch(msg[msg.length-1].toLowerCase()) {
+                    case 'co':
                     case 'oc':
                         if(ret === '') {
                             ret = retOrbsCrys;
                         } else {
                             ret += retNewLine;
                             ret = retOrbsCrys;
+                        }
+                        break;
+                    case 'ot':
+                    case 'to':
+                        if(ret === '') {
+                            ret = retOrbsTets;
+                        } else {
+                            ret += retNewLine;
+                            ret = retOrbsTets;
+                        }
+                        break;
+                    case 'ct':
+                    case 'tc':
+                        if(ret === '') {
+                            ret = retCrysTets;
+                        } else {
+                            ret += retNewLine;
+                            ret = retCrysTets;
                         }
                         break;
                     case 'o':
