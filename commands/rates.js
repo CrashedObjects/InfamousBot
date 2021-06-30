@@ -179,7 +179,9 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
                 }
                 userid_user_rates = JSON.stringify(userid_user_rates);
                 await ratesDB.set(userid_user_rates_dbkey, userid_user_rates)
-                message.channel.send(await ratesDB.get(userid_user_rates_dbkey));
+                //message.channel.send(await ratesDB.get(userid_user_rates_dbkey));
+                message.channel.send("Setting rates for user: " + msg[1]);
+                rates(prefixDB, ratesDB, client, message, userid, chanid, ["get", msg[1]]);
             }
             else {
                 message.channel.send("No such RS level " + msg[2]);
@@ -229,7 +231,7 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
                 }
                 ret += "```";
                 message.channel.send(ret);
-                message.channel.send(userid_user_rates_msg);
+                //message.channel.send(userid_user_rates_msg);
                 return;
             }
         }
