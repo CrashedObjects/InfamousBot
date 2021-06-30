@@ -94,7 +94,8 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
 
             await ratesDB.set(userid_to_user_rates_dbkey, JSON.stringify(userid_to_user_rates));
             message.channel.send("Copied rates from " + msg[1] + " to " + msg[2]);
-            message.channel.send(await ratesDB.get(userid_to_user_rates_dbkey));
+            //message.channel.send(await ratesDB.get(userid_to_user_rates_dbkey));
+            rates(prefixDB, ratesDB, client, message, userid, chanid, ["get", msg[2]]);
         } else {
             message.channel.send(ratesHelp(prefix));
         }
