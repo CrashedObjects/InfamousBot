@@ -441,6 +441,7 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
                             ret = retOrbsCrys;
                         } else {
                             ret = retOrbs;
+                            ret += retNewLine;
                             ret += retCrys;
                         }
                         ret += retNewLine;
