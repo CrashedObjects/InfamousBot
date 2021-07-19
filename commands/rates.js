@@ -53,8 +53,8 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
 
     if (msg[0].toLowerCase() === 'copy') {
         if (msg.length >= 3) {
-            var userid_from_user_rates_dbkey = userid + "_" + msg[1] + "_rates";
-            var userid_to_user_rates_dbkey = userid + "_" + msg[2] + "_rates";
+            var userid_from_user_rates_dbkey = userid + "_" + msg[1].toLowerCase() + "_rates";
+            var userid_to_user_rates_dbkey = userid + "_" + msg[2].toLowerCase() + "_rates";
 
             var userid_from_user_rates = await ratesDB.get(userid_from_user_rates_dbkey);
 
@@ -87,7 +87,7 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
             }
 
             if(userid_list.indexOf(msg[2].toLowerCase()) === -1) {
-                userid_list.push(msg[2]);
+                userid_list.push(msg[2].toLowerCase());
                 userid_list = JSON.stringify(userid_list);
                 await ratesDB.set(userid_list_dbkey, userid_list);
             }
@@ -104,7 +104,7 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
 
     if (msg[0].toLowerCase() === 'delete' || msg[0].toLowerCase() === 'del') {
         if (msg.length === 2) {
-            var userid_del_user_rates_dbkey = userid + "_" + msg[1] + "_rates";
+            var userid_del_user_rates_dbkey = userid + "_" + msg[1].toLowerCase() + "_rates";
             message.channel.send("Deleting rates for user: " + msg[1]);
             await ratesDB.delete(userid_del_user_rates_dbkey);
 
@@ -126,7 +126,7 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
                 await ratesDB.set(userid_list_dbkey, userid_list);
             }
 
-            var userid_user_rates_default_output_dbkey = userid + "_" + msg[1] + "_rates_default_output";
+            var userid_user_rates_default_output_dbkey = userid + "_" + msg[1].toLowerCase() + "_rates_default_output";
             var userid_user_rates_default_output = await ratesDB.get(userid_user_rates_default_output_dbkey);
 
             if (userid_user_rates_default_output != undefined) {
@@ -139,7 +139,7 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
 
     if (msg[0].toLowerCase() === 'set') {
         if (msg.length === 7) {
-            var userid_user_rates_dbkey = userid + "_" + msg[1] + "_rates";
+            var userid_user_rates_dbkey = userid + "_" + msg[1].toLowerCase() + "_rates";
             var userid_user_rates = await ratesDB.get(userid_user_rates_dbkey);
             var new_userid_user_rates = [parseRSlevel(msg[2]), parseFloat(msg[3]), parseFloat(msg[4]), parseFloat(msg[5]), parseFloat(msg[6])];
             if (parseInt(msg[2].toLowerCase().replace("rs", "")) > 0 && parseInt(msg[2].toLowerCase().replace("rs", "")) < 12) {
@@ -154,7 +154,7 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
                     userid_list = [];
                 }
                 if(userid_list.indexOf(msg[1].toLowerCase()) === -1) {
-                    userid_list.push(msg[1]);
+                    userid_list.push(msg[1].toLowerCase());
                     userid_list = JSON.stringify(userid_list);
                     await ratesDB.set(userid_list_dbkey, userid_list);
                 }
@@ -200,7 +200,7 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
 
     if (msg[0].toLowerCase() === 'get') {
         if (msg.length === 2) {
-            var userid_user_rates_dbkey = userid + "_" + msg[1] + "_rates";
+            var userid_user_rates_dbkey = userid + "_" + msg[1].toLowerCase() + "_rates";
             var userid_user_rates = await ratesDB.get(userid_user_rates_dbkey);
             var userid_user_rates_msg = userid_user_rates;
 
@@ -244,7 +244,7 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
 
     if (msg[0].toLowerCase() === 'default' || msg[0].toLowerCase() === 'def') {
         if (msg.length === 2) {
-            var userid_user_rates_default_output_dbkey = userid + "_" + msg[1] + "_rates_default_output";
+            var userid_user_rates_default_output_dbkey = userid + "_" + msg[1].toLowerCase() + "_rates_default_output";
             var userid_user_rates_default_output = await ratesDB.get(userid_user_rates_default_output_dbkey);
 
             if (userid_user_rates_default_output != undefined) {
@@ -255,9 +255,9 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
             return;
         }
         if (msg.length === 3) {
-            var userid_user_rates_default_output_dbkey = userid + "_" + msg[1] + "_rates_default_output";
+            var userid_user_rates_default_output_dbkey = userid + "_" + msg[1].toLowerCase() + "_rates_default_output";
 
-            var userid_user_rates_dbkey = userid + "_" + msg[1] + "_rates";
+            var userid_user_rates_dbkey = userid + "_" + msg[1].toLowerCase() + "_rates";
             var userid_user_rates = await ratesDB.get(userid_user_rates_dbkey);
             var userid_user_rates_msg = userid_user_rates;
 
@@ -279,9 +279,9 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
 
     if (msg[0].toLowerCase() === 'calc') {
         if (msg.length >= 4) {
-            var userid_user_rates_dbkey = userid + "_" + msg[1] + "_rates";
+            var userid_user_rates_dbkey = userid + "_" + msg[1].toLowerCase() + "_rates";
             var userid_user_rates = await ratesDB.get(userid_user_rates_dbkey);
-            var userid_user_rates_default_output_dbkey = userid + "_" + msg[1] + "_rates_default_output";
+            var userid_user_rates_default_output_dbkey = userid + "_" + msg[1].toLowerCase() + "_rates_default_output";
             var userid_user_rates_default_output = await ratesDB.get(userid_user_rates_default_output_dbkey);
 
             if ((userid_user_rates_default_output != undefined) && (msg.length % 2 === 0)) {
