@@ -5,6 +5,7 @@ module.exports = function() {
         ret += "- afk\n";
         ret += "- back\n";
         ret += "- wsbot\n";
+        ret += "- rates\n";
         ret += "\nFor more info, type `[command name] help`";
         message.channel.send(ret);
         return;

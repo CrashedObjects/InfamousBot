@@ -11,6 +11,7 @@ require ('./commands/afk.js')();
 require ('./commands/wsbot.js')();
 require ('./commands/help.js')();
 require ('./commands/rates.js')();
+require ('./commands/interval.js')();
 
 const client = new Client();
 
@@ -52,7 +53,15 @@ const globalPrefix = '.';
 const userMentionRegex = /<@!?\d+>/g;
 const roleMentionRegex = /<@&!?\d+>/g;
 
-client.on('ready', () => console.log('Ready!'));
+client.on('ready', () => {
+	console.log('Ready!');
+
+	// Code for background task executed every minute
+/*	var checkminutes = 1, checkthe_interval = checkminutes * 60 * 1000;
+	setInterval(async () => {
+		await interval(client);
+	}, checkthe_interval);*/
+});
 
 
 client.on('message', async message => {
