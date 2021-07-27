@@ -138,10 +138,13 @@ client.on('message', async message => {
 			ptargs = ptargs + " " + element;
 		});
 
-		return message.channel.send(parseTime(ptargs))
-			.then(msg => {
-				msg.delete({timeout: 10000})
-			});
+		var ptRet = parseTime(ptargs);
+		if (ptRet != undefined) {
+			return message.channel.send(parseTime(ptargs))
+				.then(msg => {
+					msg.delete({timeout: 10000})
+				});
+		}
 	}
 	
 	if (command === 'timediff') {
@@ -150,10 +153,13 @@ client.on('message', async message => {
 			tdargs = tdargs + " " + element;
 		});
 
-		return message.channel.send(timeDiff(tdargs))
-			.then(msg => {
-				msg.delete({timeout: 10000})
-			});
+		var tdRet = timeDiff(tdargs);
+		if(tdRet != undefined) {
+			return message.channel.send(timeDiff(tdargs))
+				.then(msg => {
+					msg.delete({timeout: 10000})
+				});
+		}
 	}
 
 	if (command === 'time') {
