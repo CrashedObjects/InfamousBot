@@ -119,7 +119,9 @@ client.on('message', async message => {
 	}
 
     if (command === 'ping') {
-        message.channel.send('pong!');
+		message.channel.send('Loading data').then (async (msg) =>{
+			msg.edit(`Latency: ${msg.createdTimestamp - message.createdTimestamp}ms.\nAPI Latency: ${Math.round(client.ws.ping)}ms`);
+		  })
     }
 
     if (command === 'prefix') {
