@@ -1,4 +1,4 @@
-const { Client } = require('discord.js');
+const { Client, Intents } = require('discord.js');
 const { token } = require('./settings');
 const Keyv = require('keyv');
 const fs = require('fs');
@@ -13,7 +13,7 @@ require ('./commands/help.js')();
 require ('./commands/rates.js')();
 require ('./commands/interval.js')();
 
-const client = new Client();
+const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
 
 const dbPath = './db.sqlite';
 
