@@ -13,7 +13,7 @@ require ('./commands/help.js')();
 require ('./commands/rates.js')();
 require ('./commands/interval.js')();
 
-const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
+const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 
 const dbPath = './db.sqlite';
 
@@ -64,7 +64,7 @@ client.on('ready', () => {
 });
 
 
-client.on('message', async message => {
+client.on('messageCreate', async message => {
     if (message.author.bot) return;
 	
 	let args;
