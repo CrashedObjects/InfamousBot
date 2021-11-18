@@ -1,5 +1,8 @@
 FROM node:latest
 
+# Install python
+RUN apt-get update || : && apt-get install python -y
+
 # Create code dir
 RUN mkdir -p /usr/src/bot
 WORKDIR /usr/src/bot
