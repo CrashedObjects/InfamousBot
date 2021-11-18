@@ -1,6 +1,6 @@
 FROM node:latest
 
-# Install python
+# Install python (needed for compiling certain libs)
 RUN apt-get update || : && apt-get install python -y
 
 # Create code dir
