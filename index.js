@@ -12,6 +12,7 @@ require ('./commands/wsbot.js')();
 require ('./commands/help.js')();
 require ('./commands/rates.js')();
 require ('./commands/interval.js')();
+require ('./commands/sendMsg.js')();
 
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 
@@ -65,7 +66,28 @@ client.on('ready', () => {
 
 
 client.on('messageCreate', async message => {
-    if (message.author.bot) return;
+    main(message);
+});
+
+client.on('messageUpdate', async (old_message, message) => {
+	//only respond to edits done within a certain timeframe
+	var TTL = 5*60*1000; //in milliseconds
+	
+	if (old_message.editedTimestamp != null) {
+		TTL = old_message.editedTimestamp + TTL;
+	} else {
+		TTL = old_message.createdTimestamp + TTL;
+	}
+	
+	if (TTL >= Date.now()){
+		main(message);
+	}
+});
+
+client.login(token);
+
+async function main(message) {
+	if (message.author.bot) return;
 	
 	let args;
 	// handle messages in a guild
@@ -185,6 +207,4 @@ client.on('messageCreate', async message => {
 	if(command === 'rates') {
 		await rates(prefixDB, ratesDB, client, message, message.author.id, message.channel.id, args);
 	}
-});
-
-client.login(token);
+}

@@ -3,6 +3,7 @@ const Keyv = require('keyv');
 require('./parseTime.js')();
 require('./time.js')();
 require('./timeDiff.js')();
+require ('./sendMsg.js')();
 
 module.exports = function() {
     this.rates = function (prefixDB, ratesDB, client, message, userid, chanid, msg) {
@@ -47,7 +48,7 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
 
 
     if ((msg.length < 1) || (msg[0].toLowerCase() === 'help')) {
-        message.channel.send(ratesHelp(prefix));
+        sendMsg(message, ratesHelp(prefix));
         return;
     }
 
@@ -59,7 +60,7 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
             var userid_from_user_rates = await ratesDB.get(userid_from_user_rates_dbkey);
 
             if (userid_from_user_rates === undefined) {
-                message.channel.send("Unable to copy rates. No rates found for user: " + msg[1]);
+                sendMsg(message, "Unable to copy rates. No rates found for user: " + msg[1]);
                 return;
             }
 
@@ -93,11 +94,11 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
             }
 
             await ratesDB.set(userid_to_user_rates_dbkey, JSON.stringify(userid_to_user_rates));
-            message.channel.send("Copied rates from " + msg[1] + " to " + msg[2]);
-            //message.channel.send(await ratesDB.get(userid_to_user_rates_dbkey));
+            sendMsg(message, "Copied rates from " + msg[1] + " to " + msg[2]);
+            //sendMsg(message, await ratesDB.get(userid_to_user_rates_dbkey));
             rates(prefixDB, ratesDB, client, message, userid, chanid, ["get", msg[2]]);
         } else {
-            message.channel.send(ratesHelp(prefix));
+            sendMsg(message, ratesHelp(prefix));
         }
         return;
     }
@@ -105,7 +106,7 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
     if (msg[0].toLowerCase() === 'delete' || msg[0].toLowerCase() === 'del') {
         if (msg.length === 2) {
             var userid_del_user_rates_dbkey = userid + "_" + msg[1].toLowerCase() + "_rates";
-            message.channel.send("Deleting rates for user: " + msg[1]);
+            sendMsg(message, "Deleting rates for user: " + msg[1]);
             await ratesDB.delete(userid_del_user_rates_dbkey);
 
             var userid_list_dbkey = userid + "_list";
@@ -122,7 +123,7 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
             if(userid_list.indexOf(msg[1].toLowerCase()) != -1) {
                 userid_list.splice(userid_list.indexOf(msg[1].toLowerCase()), 1);
                 userid_list = JSON.stringify(userid_list);
-                message.channel.send("Updating rates list");
+                sendMsg(message, "Updating rates list");
                 await ratesDB.set(userid_list_dbkey, userid_list);
             }
 
@@ -133,7 +134,7 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
                 await ratesDB.delete(userid_user_rates_default_output_dbkey);
             }
         } else {
-            message.channel.send(ratesHelp(prefix));
+            sendMsg(message, ratesHelp(prefix));
         }
     }
 
@@ -180,20 +181,20 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
                 }
                 userid_user_rates = JSON.stringify(userid_user_rates);
                 await ratesDB.set(userid_user_rates_dbkey, userid_user_rates)
-                //message.channel.send(await ratesDB.get(userid_user_rates_dbkey));
-                message.channel.send("Setting rates for user: " + msg[1]);
+                //sendMsg(message, await ratesDB.get(userid_user_rates_dbkey));
+                sendMsg(message, "Setting rates for user: " + msg[1]);
                 rates(prefixDB, ratesDB, client, message, userid, chanid, ["get", msg[1]]);
             }
             else {
-                message.channel.send("No such RS level " + msg[2]);
-                message.channel.send(ratesHelp(prefix));
+                sendMsg(message, "No such RS level " + msg[2]);
+                sendMsg(message, ratesHelp(prefix));
                 return;
             }
             
             return;
         }
         else {
-            message.channel.send(ratesHelp(prefix));
+            sendMsg(message, ratesHelp(prefix));
             return;
         }
     }
@@ -209,7 +210,7 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
             }
 
             if (!Array.isArray(userid_user_rates)) {
-                message.channel.send("No rates for user " + msg[1]);
+                sendMsg(message, "No rates for user " + msg[1]);
                 return;
             }
             else {
@@ -231,13 +232,13 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
                     ret += retArr[retArr.length-i-1].replace("RS90", "RS10");
                 }
                 ret += "```";
-                message.channel.send(ret);
-                //message.channel.send(userid_user_rates_msg);
+                sendMsg(message, ret);
+                //sendMsg(message, userid_user_rates_msg);
                 return;
             }
         }
         else {
-            message.channel.send(ratesHelp(prefix));
+            sendMsg(message, ratesHelp(prefix));
             return;
         }
     }
@@ -248,9 +249,9 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
             var userid_user_rates_default_output = await ratesDB.get(userid_user_rates_default_output_dbkey);
 
             if (userid_user_rates_default_output != undefined) {
-                message.channel.send("Default output for user '" + msg[1] + "' is " + userid_user_rates_default_output);
+                sendMsg(message, "Default output for user '" + msg[1] + "' is " + userid_user_rates_default_output);
             } else {
-                message.channel.send("No default output for user '" + msg[1] + "'");
+                sendMsg(message, "No default output for user '" + msg[1] + "'");
             }
             return;
         }
@@ -264,13 +265,13 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
             if(userid_user_rates != undefined) {
                 if (msg[2].toLowerCase() === 'del' || msg[2].toLowerCase() === 'delete') {
                     await ratesDB.delete(userid_user_rates_default_output_dbkey);
-                    message.channel.send("Deleted default output for user '" + msg[1] + "'");
+                    sendMsg(message, "Deleted default output for user '" + msg[1] + "'");
                 } else {
                     await ratesDB.set(userid_user_rates_default_output_dbkey, msg[2].toLowerCase());
-                    message.channel.send("Set default output for user '" + msg[1] + "' to " + msg[2].toLowerCase());
+                    sendMsg(message, "Set default output for user '" + msg[1] + "' to " + msg[2].toLowerCase());
                 }
             } else {
-                message.channel.send("No such user '" + msg[1] + "'");
+                sendMsg(message, "No such user '" + msg[1] + "'");
                 await ratesDB.delete(userid_user_rates_default_output_dbkey);
             }
         }
@@ -293,7 +294,7 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
             }
 
             if (!Array.isArray(userid_user_rates)) {
-                message.channel.send("No rates for user " + msg[1]);
+                sendMsg(message, "No rates for user " + msg[1]);
                 return;
             }
             else {
@@ -308,11 +309,11 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
                     if ((i+1) < msg.length) {
                         var rslevel = parseRSlevel(msg[i+1]);
                         if(rslevel.toLowerCase() === "error") {
-                            message.channel.send("Error understanding RS " + msg[i+1]);
+                            sendMsg(message, "Error understanding RS " + msg[i+1]);
                             return;
                         }
                         if(userid_user_rates.indexOf(rslevel) === -1) {
-                            message.channel.send("No " + rslevel + " rates found for " + msg[1]);
+                            sendMsg(message, "No " + rslevel + " rates found for " + msg[1]);
                             return;
                         }
                         else {
@@ -449,13 +450,13 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
                         ret += retMixed;
                 }
                 
-                message.channel.send(header + ret);
+                sendMsg(message, header + ret);
 
                 return;
             }
         }
         else {
-            message.channel.send(ratesHelp(prefix));
+            sendMsg(message, ratesHelp(prefix));
             return;
         }
     }
@@ -469,13 +470,13 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
         }
 
         if (!Array.isArray(userid_user_list)) {
-            message.channel.send("No rates saved");
+            sendMsg(message, "No rates saved");
             return;
         }
         else {
             userid_user_list = JSON.stringify(userid_user_list).replaceAll("[\"", "").replaceAll("\",\"","\n").replaceAll("\"]", "");
-            message.channel.send("List of rates:\n");
-            message.channel.send(userid_user_list);
+            sendMsg(message, "List of rates:\n");
+            sendMsg(message, userid_user_list);
             return;
         }
     }
