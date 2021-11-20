@@ -475,8 +475,7 @@ async function rates (prefixDB, ratesDB, client, message, userid, chanid, msg) {
         }
         else {
             userid_user_list = JSON.stringify(userid_user_list).replaceAll("[\"", "").replaceAll("\",\"","\n").replaceAll("\"]", "");
-            sendMsg(message, "List of rates:\n");
-            sendMsg(message, userid_user_list);
+            sendMsg(message, "__List of rates:__\n" + userid_user_list);
             return;
         }
     }
