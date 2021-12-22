@@ -14,7 +14,7 @@ module.exports = function() {
 }
 
 async function afk (prefixDB, afkDB, client, message, userid, chanid, msg) {
-    message.delete({timeout: 5000});
+    setTimeout(() => message.delete(), 5000);
     var timeN = timeNow("X");
     var prefix = await prefixDB.get(message.guild.id);
     var afkchannel = chanid;
@@ -75,9 +75,9 @@ async function afk (prefixDB, afkDB, client, message, userid, chanid, msg) {
     var futureunix = parseInt(timeN) + parseInt(duration);
     var time_in_words = timeDiff("fullshort " + parseInt(timeN) + " " + parseInt(futureunix));
 
-    ret = (await client.users.fetch(userid)).username + ", you are marked as AFK for the next " + time_in_words + ".";
+    ret = (await client.users.fetch(userid)).username + ", you are marked as AFK for the next " + time_in_words.trim() + ".";
     if (afkmessage.length > 0) {
-        ret += "Reason: " + afkmessage;
+        ret += " Reason: " + afkmessage;
     }
     ret += "\n";
     if(longreason) {
@@ -118,7 +118,7 @@ async function afk (prefixDB, afkDB, client, message, userid, chanid, msg) {
         await afkDB.set(userid_afkmsg_dbkey, afkmessage);
     }
 
-    message.channel.send(ret);
+    //message.channel.send(ret);
     return;
 }
 
@@ -159,7 +159,7 @@ async function back(prefixDB, afkDB, client, message, userid, chanid, msg, autor
     userid_afk_set = parseInt(userid_afk_set);
 
     if(autoresponse === undefined) {
-        message.delete({timeout: 5000});
+        setTimeout(() => message.delete(), 5000);
         if(userid_afk != undefined && !isNaN(userid_afk)) {
             backmsg += "OK, <@!" + userid + ">, you are no longer marked as being AFK.\n\n";
             backmsg += "You came back ";
@@ -177,7 +177,7 @@ async function back(prefixDB, afkDB, client, message, userid, chanid, msg, autor
         deleteLastAFKMsg(userid);
         message.channel.send(backmsg)
             .then(msg => {
-                msg.delete({timeout: 30000})
+                setTimeout(() => msg.delete(), 5000)
             });
     } else {
         //auto response
@@ -198,7 +198,7 @@ async function back(prefixDB, afkDB, client, message, userid, chanid, msg, autor
 
             message.channel.send(backmsg)
                 .then(msg => {
-                    msg.delete({timeout: 30000})
+                    setTimeout(() => msg.delete(), 30000)
                 });
         } else {
             return;

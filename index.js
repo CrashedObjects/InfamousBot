@@ -66,10 +66,12 @@ client.on('ready', () => {
 
 
 client.on('messageCreate', async message => {
+	if (message.author.bot) return;
     main(message);
 });
 
 client.on('messageUpdate', async (old_message, message) => {
+	if (message.author.bot) return;
 	//only respond to edits done within a certain timeframe
 	var TTL = 5*60*1000; //in milliseconds
 	
@@ -88,7 +90,6 @@ client.login(token);
 
 async function main(message) {
 	if (message.author.bot) return;
-	
 	let args;
 	// handle messages in a guild
 	if (message.guild) {
@@ -111,7 +112,7 @@ async function main(message) {
 				if (userMentionedRes != undefined) {
 					return message.channel.send(userMentionedRes)
 					.then(msg => {
-						msg.delete({timeout: 600000})
+						setTimeout(() => msg.delete(), 600000)
 					});
 				}
 				// empty message. nothing to send
@@ -166,7 +167,7 @@ async function main(message) {
 		if (ptRet != undefined) {
 			return message.channel.send(parseTime(ptargs))
 				.then(msg => {
-					msg.delete({timeout: 10000})
+					setTimeout(() => msg.delete(), 10000)
 				});
 		}
 	}
@@ -181,7 +182,7 @@ async function main(message) {
 		if(tdRet != undefined) {
 			return message.channel.send(timeDiff(tdargs))
 				.then(msg => {
-					msg.delete({timeout: 10000})
+					setTimeout(() => msg.delete(), 10000)
 				});
 		}
 	}

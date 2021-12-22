@@ -15,6 +15,7 @@ module.exports = function() {
 
 
 async function respondAFK(afkDB, client, message, userid, chanid, msg, deleteTimeDelay) {
+    var debug = true;
     // find out if there's actually someone mentioned who is AFK. Sort into members vs non-members
     var memberafk = [];
     var usermentionregex = /<@!?\d+>/g;
@@ -38,15 +39,14 @@ async function respondAFK(afkDB, client, message, userid, chanid, msg, deleteTim
         var afkuser_afk_dbkey = afkuser + "_afk";
         var afkuser_afk = await afkDB.get(afkuser_afk_dbkey);
         
-        if ((afkuser_afk != undefined) && (afkuser != userid) && (parseInt(afk_notify_expiry_time) < parseInt(timeNow("X")))) {
+        if ((afkuser_afk != undefined) && (afkuser != userid) && ((parseInt(afk_notify_expiry_time) < parseInt(timeNow("X"))) || debug == true)) {
             memberafk.push(afkuser);
             await afkDB.set(afk_notify_expiry_time_dbkey, parseInt(timeNow("X")) + parseInt(deleteTimeDelay));
         }
     }
-    
     // exit early if there are no AFK users mentioned
     if (memberafk.length === 0) { return; }
-
+    
     //build the messages for replies or DMs as needed
     var now = time("X");
 
@@ -83,6 +83,8 @@ async function respondAFK(afkDB, client, message, userid, chanid, msg, deleteTim
         .setColor('#ffc44f')
         .setTitle('AFK Alert for the following members:')
         .setDescription(description);
+
+    message.channel.send({ embeds: [embed] });
     
-    return embed;
+    return;
 }
