@@ -15,7 +15,7 @@ module.exports = function() {
 
 
 async function respondAFK(afkDB, client, message, userid, chanid, msg, deleteTimeDelay) {
-    var debug = true;
+    var debug = false;
     // find out if there's actually someone mentioned who is AFK. Sort into members vs non-members
     var memberafk = [];
     var usermentionregex = /<@!?\d+>/g;
