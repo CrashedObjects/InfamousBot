@@ -2,6 +2,7 @@ const { Client, Intents } = require('discord.js');
 const { token } = require('./settings');
 const Keyv = require('keyv');
 const fs = require('fs');
+const inftimer = require('./commands/infTimer');
 
 require ('./commands/parseTime.js')();
 require ('./commands/timeDiff.js')();
@@ -13,8 +14,12 @@ require ('./commands/help.js')();
 require ('./commands/rates.js')();
 require ('./commands/interval.js')();
 require ('./commands/sendMsg.js')();
+require ('./commands/infTimer.js')();
 
-const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
+const client = new Client({ 
+	intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MESSAGE_REACTIONS],
+	partials: ['MESSAGE', 'CHANNEL', 'REACTION'],
+});
 
 const dbPath = './db.sqlite';
 
@@ -47,6 +52,11 @@ const ratesDB = new Keyv('sqlite://./db.sqlite', {
 
 const rosterDB = new Keyv('sqlite://./db.sqlite', {
 	table: 'wsroster',
+	busyTimeout: 10000
+});
+
+const infTimerDB = new Keyv('sqlite://./db.sqlite', {
+	table: 'infTimer',
 	busyTimeout: 10000
 });
 
@@ -83,6 +93,39 @@ client.on('messageUpdate', async (old_message, message) => {
 	
 	if (TTL >= Date.now()){
 		main(message);
+	}
+});
+
+client.on('messageReactionAdd', async (reaction, user) => {
+	// When a reaction is received, check if the structure is partial
+	if (reaction.partial) {
+		// If the message this reaction belongs to was removed, the fetching might result in an API error which should be handled
+		try {
+			await reaction.fetch();
+		} catch (error) {
+			console.error('Something went wrong when fetching the message:', error);
+			// Return as `reaction.message.author` may be undefined/null
+			return;
+		}
+	}
+
+	// Now the message has been cached and is fully available
+	//console.log(`${reaction.message.author}'s message "${reaction.message.content}" gained a reaction!`);
+	// The reaction is now also fully available and the properties will be reflected accurately:
+	//console.log(`${reaction.count} user(s) have given the same reaction to this message!`);
+	//console.log(user);
+	if (user.bot) return;
+
+	// for invoking inftimer via reaction
+	if (reaction.emoji.name === "🔴") {
+		var userInfTimer_dbkey = user.id + "_inftimer";
+		var userInfTimer = await infTimerDB.get(userInfTimer_dbkey);
+    	if (userInfTimer != undefined) {
+			userInfTimer = JSON.parse(userInfTimer);
+			if (userInfTimer.userid === user.id && userInfTimer.chanid === reaction.message.channel.id && userInfTimer.mid === reaction.message.id) {
+				await infTimer(prefixDB, infTimerDB, client, reaction.message, user.id, reaction.message.channel.id, "");
+			}
+		}
 	}
 });
 
@@ -207,5 +250,9 @@ async function main(message) {
 
 	if(command === 'rates') {
 		await rates(prefixDB, ratesDB, client, message, message.author.id, message.channel.id, args);
+	}
+
+	if(command === 'inftimer') {
+		await infTimer(prefixDB, infTimerDB, client, message, message.author.id, message.channel.id, args);
 	}
 }
