@@ -11,8 +11,25 @@ module.exports = function() {
     }
 }
 
+function help(prefix) {
+    var ret;
+    ret = "__**Command Name:**__ inftimer\n";
+    ret += "__**Purpose:**__\n";
+    ret += "To track when was the last time an RS was run and calculate 2.5 days after that run to avoid influence loss";
+    return ret;
+}
+
 async function infTimer (prefixDB, infTimerDB, client, message, userid, chanid, msg) {
     setTimeout(() => message.delete(), 5000);
+
+    var prefix = await prefixDB.get(message.guild.id);
+    if(msg.length != 0) {
+        if ((msg.length != 0) || (msg[0].toLowerCase() === 'help')) {
+            sendMsg(message, help(prefix));
+            return;
+        }
+    }
+
     var currTime = timeNow("X");
     var nextRunTime = parseInt(currTime) + (2.5*24*60*60); // 2.5 days
     var content = (await client.users.fetch(userid)).username + "'s last rs run was <t:" + currTime + ":R>";
