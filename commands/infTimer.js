@@ -6,8 +6,12 @@ require('./timeDiff.js')();
 require ('./sendMsg.js')();
 
 module.exports = function() {
-    this.infTimer = function (prefixDB, infTimerDB, client, message, userid, chanid, msg) {
-        return infTimer(prefixDB, infTimerDB, client, message, userid, chanid, msg);
+    this.infTimer = function (prefixDB, infTimerDB, client, message, userid, chanid, msg, deleteInvokeCommand) {
+        return infTimer(prefixDB, infTimerDB, client, message, userid, chanid, msg, deleteInvokeCommand);
+    }
+
+    this.infTimerAppendMessage = function (prefixDB, infTimerDB, client, message, userid, chanid, appendMessage) {
+        return infTimerAppendMessage(prefixDB, infTimerDB, client, message, userid, chanid, appendMessage);
     }
 }
 
@@ -19,8 +23,55 @@ function help(prefix) {
     return ret;
 }
 
-async function infTimer (prefixDB, infTimerDB, client, message, userid, chanid, msg) {
-    setTimeout(() => message.delete(), 5000);
+async function infTimerSendMessage (infTimerDB, userInfTimer_dbkey, client, message, userid, chanid, content, append) {
+    var dict = {
+        userid: "",
+        chanid: "",
+        mid: "",
+        lastrun: "",
+        nextrun: "",
+        message: ""
+    };
+
+    var userInfTimer = await infTimerDB.get(userInfTimer_dbkey);
+
+    if (userInfTimer != undefined) {
+        userInfTimer = JSON.parse(userInfTimer);
+        try {
+            await client.channels.cache.get(userInfTimer.chanid).messages.fetch(userInfTimer.mid).then(message => message.delete());
+        } catch (e) {
+            //console.error(e);
+        }
+        
+    } else {
+        userInfTimer = dict;
+    }
+
+    if (append) {
+        content = userInfTimer.message + content;
+    }
+
+    userInfTimer.mid = (await message.channel.send(content)).id;
+    await client.channels.cache.get(chanid).messages.fetch(userInfTimer.mid).then(message => message.react("🔴"));
+
+    return userInfTimer;
+}
+
+async function infTimerAppendMessage (prefixDB, infTimerDB, client, message, userid, chanid, appendMessage) {
+    var userInfTimer_dbkey = userid + "_inftimer";
+    userInfTimer = await infTimerSendMessage(infTimerDB, userInfTimer_dbkey, client, message, userid, chanid, appendMessage, true);
+
+    userInfTimer.chanid = chanid;
+    userInfTimer.userid = userid;
+
+    userInfTimer = JSON.stringify(userInfTimer);
+    await infTimerDB.set(userInfTimer_dbkey, userInfTimer);
+}
+
+async function infTimer (prefixDB, infTimerDB, client, message, userid, chanid, msg, deleteInvokeCommand) {
+    if(deleteInvokeCommand){
+        setTimeout(() => message.delete(), 5000);
+    }
 
     var prefix = await prefixDB.get(message.guild.id);
     if(msg.length != 0) {
@@ -35,29 +86,14 @@ async function infTimer (prefixDB, infTimerDB, client, message, userid, chanid, 
     var content = (await client.users.fetch(userid)).username + "'s last rs run was <t:" + currTime + ":R>";
     content += "\nNext run must be <t:" + nextRunTime + ":R> (<t:" + nextRunTime + ":F>)";
 
-    var dict = {
-        userid: "",
-        chanid: "",
-        mid: "",
-        lastrun: "",
-        nextrun: ""
-    };
-
     var userInfTimer_dbkey = userid + "_inftimer";
-    var userInfTimer = await infTimerDB.get(userInfTimer_dbkey);
-    if (userInfTimer != undefined) {
-        userInfTimer = JSON.parse(userInfTimer);
-        client.channels.cache.get(userInfTimer.chanid).messages.fetch(userInfTimer.mid).then(message => message.delete());
-    } else {
-        userInfTimer = dict;
-    }
-
-    userInfTimer.mid = (await message.channel.send(content)).id;
-    client.channels.cache.get(chanid).messages.fetch(userInfTimer.mid).then(message => message.react("🔴"));
+    userInfTimer = await infTimerSendMessage(infTimerDB, userInfTimer_dbkey, client, message, userid, chanid, content);
+    
     userInfTimer.chanid = chanid;
     userInfTimer.userid = userid;
     userInfTimer.lastrun = currTime;
     userInfTimer.nextrun = nextRunTime;
+    userInfTimer.message = content;
 
     userInfTimer = JSON.stringify(userInfTimer);
     await infTimerDB.set(userInfTimer_dbkey, userInfTimer);

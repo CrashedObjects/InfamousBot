@@ -123,7 +123,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
     	if (userInfTimer != undefined) {
 			userInfTimer = JSON.parse(userInfTimer);
 			if (userInfTimer.userid === user.id && userInfTimer.chanid === reaction.message.channel.id && userInfTimer.mid === reaction.message.id) {
-				await infTimer(prefixDB, infTimerDB, client, reaction.message, user.id, reaction.message.channel.id, "");
+				await infTimer(prefixDB, infTimerDB, client, reaction.message, user.id, reaction.message.channel.id, "", false);
 			}
 		}
 	}
@@ -253,6 +253,6 @@ async function main(message) {
 	}
 
 	if(command === 'inftimer') {
-		await infTimer(prefixDB, infTimerDB, client, message, message.author.id, message.channel.id, args);
+		await infTimer(prefixDB, infTimerDB, client, message, message.author.id, message.channel.id, args, true);
 	}
 }
