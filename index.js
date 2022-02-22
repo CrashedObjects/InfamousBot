@@ -2,7 +2,6 @@ const { Client, Intents } = require('discord.js');
 const { token } = require('./settings');
 const Keyv = require('keyv');
 const fs = require('fs');
-const inftimer = require('./commands/infTimer');
 
 require ('./commands/parseTime.js')();
 require ('./commands/timeDiff.js')();
@@ -13,8 +12,10 @@ require ('./commands/wsbot.js')();
 require ('./commands/help.js')();
 require ('./commands/rates.js')();
 require ('./commands/interval.js')();
+require ('./commands/intervalTask.js')();
 require ('./commands/sendMsg.js')();
 require ('./commands/infTimer.js')();
+require ('./commands/globalVar.js');
 
 const client = new Client({ 
 	intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MESSAGE_REACTIONS],
@@ -60,6 +61,11 @@ const infTimerDB = new Keyv('sqlite://./db.sqlite', {
 	busyTimeout: 10000
 });
 
+const intervalDB = new Keyv('sqlite://./db.sqlite', {
+	table: 'interval',
+	busyTimeout: 10000
+});
+
 const globalPrefix = '.';
 const userMentionRegex = /<@!?\d+>/g;
 const roleMentionRegex = /<@&!?\d+>/g;
@@ -68,10 +74,10 @@ client.on('ready', () => {
 	console.log('Ready!');
 
 	// Code for background task executed every minute
-/*	var checkminutes = 1, checkthe_interval = checkminutes * 60 * 1000;
+	var checkminutes = 1, checkthe_interval = checkminutes * 60 * 1000;
 	setInterval(async () => {
-		await interval(client);
-	}, checkthe_interval);*/
+		await interval(intervalDB, infTimerDB, client, timeNow("X"));
+	}, checkthe_interval);
 });
 
 
@@ -123,7 +129,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
     	if (userInfTimer != undefined) {
 			userInfTimer = JSON.parse(userInfTimer);
 			if (userInfTimer.userid === user.id && userInfTimer.chanid === reaction.message.channel.id && userInfTimer.mid === reaction.message.id) {
-				await infTimer(prefixDB, infTimerDB, client, reaction.message, user.id, reaction.message.channel.id, "", false);
+				await infTimer(prefixDB, infTimerDB, intervalDB, client, reaction.message, user.id, reaction.message.channel.id, "", false);
 			}
 		}
 	}
@@ -253,6 +259,6 @@ async function main(message) {
 	}
 
 	if(command === 'inftimer') {
-		await infTimer(prefixDB, infTimerDB, client, message, message.author.id, message.channel.id, args, true);
+		await infTimer(prefixDB, infTimerDB, intervalDB, client, message, message.author.id, message.channel.id, args, true);
 	}
 }
