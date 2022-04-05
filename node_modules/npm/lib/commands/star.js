@@ -1,36 +1,24 @@
 const fetch = require('npm-registry-fetch')
-const log = require('npmlog')
 const npa = require('npm-package-arg')
-
+const log = require('../utils/log-shim')
 const getIdentity = require('../utils/get-identity')
 
 const BaseCommand = require('../base-command.js')
 class Star extends BaseCommand {
-  static get description () {
-    return 'Mark your favorite packages'
-  }
+  static description = 'Mark your favorite packages'
+  static name = 'star'
+  static usage = ['[<pkg>...]']
+  static params = [
+    'registry',
+    'unicode',
+  ]
 
-  /* istanbul ignore next - see test/lib/load-all-commands.js */
-  static get name () {
-    return 'star'
-  }
-
-  /* istanbul ignore next - see test/lib/load-all-commands.js */
-  static get usage () {
-    return ['[<pkg>...]']
-  }
-
-  /* istanbul ignore next - see test/lib/load-all-commands.js */
-  static get params () {
-    return [
-      'registry',
-      'unicode',
-    ]
-  }
+  static ignoreImplicitWorkspace = false
 
   async exec (args) {
-    if (!args.length)
+    if (!args.length) {
       throw this.usageError()
+    }
 
     // if we're unstarring, then show an empty star image
     // otherwise, show the full star image
@@ -43,7 +31,7 @@ class Star extends BaseCommand {
     const pkgs = args.map(npa)
     for (const pkg of pkgs) {
       const [username, fullData] = await Promise.all([
-        getIdentity(this.npm, this.npm.flatOptions),
+        getIdentity(this.npm, { ...this.npm.flatOptions }),
         fetch.json(pkg.escapedName, {
           ...this.npm.flatOptions,
           spec: pkg,
@@ -52,8 +40,9 @@ class Star extends BaseCommand {
         }),
       ])
 
-      if (!username)
+      if (!username) {
         throw new Error('You need to be logged in!')
+      }
 
       const body = {
         _id: fullData._id,
