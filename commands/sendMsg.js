@@ -25,17 +25,26 @@ async function sendMsg(message, content) {
             midListing = [];
         }
 
+        var newMidListing = midListing;
+
         // clean up db for past TTL messages
         if(midListing.length > 0) {
             for (var i = 0; i < midListing.length; i++) {
                 var midListingTTL = await midDB.get(midListing[i]);
-                midListingTTL = parseInt(midListingTTL[2]);
+
+                // if midListingTTL is missing, delete this key from db
+                if (midListingTTL != undefined) {
+                    midListingTTL = parseInt(midListingTTL[2]);
+                } else {
+                    midListingTTL = 0;
+                }                
                 
                 if (midListingTTL <= msNow) {
                     await midDB.delete(midListing[i]);
-                    midListing.splice(i,1);
+                    newMidListing.splice(i,1);
                 }
             }
+            midListing = newMidListing;
             await midDB.set(midListingKey, midListing);
         }
         
