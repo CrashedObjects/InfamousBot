@@ -88,7 +88,7 @@ async function infTimer (prefixDB, infTimerDB, intervalDB, client, message, user
     }
 
     var currTime = timeNow("X");
-    var nextRunTime = parseInt(currTime) + (2.5*24*60*60); // 2.5 days
+    var nextRunTime = parseInt(currTime) + (2*24*60*60); // 2.5 days
     var latestNextRunTime = parseInt(currTime) + (3*24*60*60); // 3 days
     var content = (await client.users.fetch(userid)).username + "'s last rs run was <t:" + currTime + ":R>";
     content += "\nNext run must be <t:" + nextRunTime + ":R> (<t:" + nextRunTime + ":F>)";
